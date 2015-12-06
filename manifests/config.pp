@@ -235,6 +235,7 @@ class bacula::config {
   $director_template = $::bacula_director_template
   $storage_template  = $::bacula_storage_template
   $console_template  = $::bacula_console_template
+  $client_template   = $::bacula_client_template
   
   $director_service = $::bacula_director_service ? {
     undef  => $osfamily ? {
@@ -242,5 +243,21 @@ class bacula::config {
       default         => 'bacula-director',
     },
     default => $::bacula_director_service,
+  }
+
+  $working_directory = $::bacula_working_directory ? {
+    undef  => $osfamily ? {
+      /(RedHat)/ => '/var/spool/bacula',
+      default         => '/var/lib/bacula',
+    },
+    default => $::bacula_working_directory,
+  }
+
+  $pid_directory = $::bacula_pid_directory ? {
+    undef  => $osfamily ? {
+      /(RedHat|Suse)/ => '/var/run',
+      default         => '/var/run/bacula',
+    },
+    default => $::bacula_pid_directory,
   }
 }

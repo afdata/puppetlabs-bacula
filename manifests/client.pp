@@ -25,8 +25,11 @@
 class bacula::client(
     $director_server,
     $director_password,
-    $client_package
-  ) {
+    $client_package = $bacula::config::client_package,
+    $template = 'bacula/bacula-fd.conf.erb',
+    $working_directory = $bacula::config::working_directory,
+    $pid_directory = $bacula::config::pid_directory
+  ) inherits bacula::config {
 
   $director_name_array = split($director_server, '[.]')
   $director_name = $director_name_array[0]
@@ -37,7 +40,7 @@ class bacula::client(
 
   file { '/etc/bacula/bacula-fd.conf':
     ensure  => file,
-    content => template('bacula/bacula-fd.conf.erb'),
+    content => template($template),
     notify  => Service['bacula-fd'],
     require => Package[$client_package],
   }
