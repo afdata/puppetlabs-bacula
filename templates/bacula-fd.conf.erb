@@ -13,8 +13,8 @@ Director {
 # Now configure the actual File Daemon
 FileDaemon {
   Name = "<%= @hostname.split('.').first -%>"
-  Working Directory = /var/lib/bacula
-  PID Directory = /var/run/bacula
+  Working Directory = <%= @working_directory %>
+  PID Directory = <%= @pid_directory %>
   Maximum Concurrent Jobs = 3
 }
 

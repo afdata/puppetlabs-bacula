@@ -132,9 +132,12 @@ class bacula(
     $director_template       = $bacula::config::director_template,
     $storage_template        = $bacula::config::storage_template,
     $console_template        = $bacula::config::console_template,
+    $client_template         = $bacula::config::client_template,
     $use_console             = $bacula::config::safe_use_console,
     $console_password        = $bacula::config::console_password,
     $director_service        = $bacula::config::director_service,
+    $working_directory       = $bacula::config::working_directory,
+    $pid_directory           = $bacula::config::pid_directory,
     $clients                 = {}
   ) inherits bacula::config {
     
