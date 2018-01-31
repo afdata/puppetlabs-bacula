@@ -1,46 +1,69 @@
-# DO NOT EDIT - Managed by Puppet
-#
+## vim: ft=bacula expandtab shiftwidth=2 tabstop=2 softtabstop=2
 # Bacula Storage Daemon Configuration
 #   for <%= @storage_name %>
 #   via <%= @director_name -%>:director (<%= @director_name -%>)
 
-# Configure the Director which will manage this Storage Daemon, and the
-# Director through which we'll send our messages (will be the same) one.
+#
+# List Directors who are permitted to contact Storage daemon
+#
 Director {
   Name = "<%= @director_name -%>:director"
-  Password = "<%= director_password -%>"
+  Password = "<%= @storage_password -%>"
 }
 
-Messages {
-  Name = "<%= @storage_name -%>:messages:standard"
-  Director = "<%= @director_name -%>:director" = all
-}
-
-# Configure the basic details for the Storage Daemon on this server
-Storage {
-  Name = "<%= @storage_name -%>:storage"
-  Working Directory = "/var/lib/bacula"
-  PID Directory = "/var/run/bacula"
-  Maximum Concurrent Jobs = 20
-}
-
+#
 # Also configure access for something to monitor this Storage Daemon
+#
 Director {
   Name = "<%= @storage_name -%>:monitor:storage"
   Password = "<%= @console_password -%>"
   Monitor = Yes
 }
 
-# Not configure the default Device this Storage Daemon will provide
+Storage {
+  Name = "<%= @storage_name -%>:storage"
+  SDPort = 9103
+  WorkingDirectory = "<%= @working_directory -%>"
+  Pid Directory = "<%= @pid_directory %>"
+  Maximum Concurrent Jobs = 2
+}
+
+Autochanger {
+  Name = FileStorage
+  Device = FileStorage-Dev1, FileStorage-Dev2
+  Changer Command = /dev/null
+  Changer Device = /dev/null
+}
+
 Device {
-  Name = "FileStorage"
+  Name = FileStorage-Dev1
   Media Type = File
-  Archive Device = /mnt/bacula/default
-  Label Media = Yes
-  Random Access = Yes
-  Automatic Mount = Yes
-  Removable Media = No
-  Always Open = No
+  Archive Device = /mnt/bacula
+  LabelMedia = yes;
+  Random Access = Yes;
+  AutomaticMount = yes;
+  RemovableMedia = no;
+  AlwaysOpen = no;
+  Maximum Concurrent Jobs = 5
+  Autochanger = yes
+}
+
+Device {
+  Name = FileStorage-Dev2
+  Media Type = File
+  Archive Device = /mnt/bacula
+  LabelMedia = yes;
+  Random Access = Yes;
+  AutomaticMount = yes;
+  RemovableMedia = no;
+  AlwaysOpen = no;
+  Maximum Concurrent Jobs = 5
+  Autochanger = yes
+}
+
+Messages {
+  Name = "<%= @storage_name -%>:messages:standard"
+  Director = "<%= @director_name -%>:director" = all
 }
 
 # All other Devices are created by the clients that need them - each will

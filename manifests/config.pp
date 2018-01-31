@@ -1,13 +1,13 @@
 # Class:: bacula::config
-# 
+#
 # This class determines default values for parameters needed
-# to configure the bacula class.  It looks for variables in 
+# to configure the bacula class.  It looks for variables in
 # top scope (probably from an ENC such as Dashboard).
 # If the variable doesn't exist in top scope, fall back to
-# a hard coded default. 
-# 
+# a hard coded default.
+#
 # Some of the variables in this class need to be booleans.
-# However, if we get the value from top scope, it could 
+# However, if we get the value from top scope, it could
 # be a string since Dashboard can't express booleans.
 # So we need to see if it's a string and attempt to
 # convert it to a boolean
@@ -16,17 +16,17 @@
 #
 # class { 'bacula::config': }
 class bacula::config {
-
-  #If we have a top scope variable defined, use it.
-  #Fall back to a hardcoded value.
+  # If we have a top scope variable defined, use it.
+  # Fall back to a hardcoded value.
   #
-  #Since the top scope variable could be a string
-  #(if from an ENC), we might need to convert it
-  #to a boolean
+  # Since the top scope variable could be a string
+  # (if from an ENC), we might need to convert it
+  # to a boolean
   $manage_console = $::bacula_manage_console ? {
     undef   => false,
     default => $::bacula_manage_console,
   }
+
   if is_string($manage_console) {
     $safe_manage_console = str2bool($manage_console)
   } else {
@@ -37,17 +37,18 @@ class bacula::config {
     undef   => false,
     default => $::bacula_manage_bat,
   }
+
   if is_string($manage_bat) {
     $safe_manage_bat = str2bool($manage_bat)
   } else {
     $safe_manage_bat = $manage_bat
   }
 
-
   $is_director = $::bacula_is_director ? {
-    undef   => false, 
+    undef   => false,
     default => $::bacula_is_director,
   }
+
   if is_string($is_director) {
     $safe_is_director = str2bool($is_director)
   } else {
@@ -58,6 +59,7 @@ class bacula::config {
     undef   => true,
     default => $::bacula_is_client,
   }
+
   if is_string($is_client) {
     $safe_is_client = str2bool($is_client)
   } else {
@@ -68,16 +70,18 @@ class bacula::config {
     undef   => false,
     default => $::bacula_is_storage,
   }
+
   if is_string($is_storage) {
     $safe_is_storage = str2bool($is_storage)
   } else {
-    $safe_is_storage= $is_storage
+    $safe_is_storage = $is_storage
   }
 
   $use_console = $::bacula_use_console ? {
     undef   => false,
     default => $::bacula_use_console,
   }
+
   if is_string($use_console) {
     $safe_use_console = str2bool($use_console)
   } else {
@@ -88,6 +92,7 @@ class bacula::config {
     undef   => false,
     default => $::bacula_manage_db,
   }
+
   if is_string($manage_db) {
     $safe_manage_db = str2bool($manage_db)
   } else {
@@ -98,20 +103,26 @@ class bacula::config {
     undef   => true,
     default => $::bacula_manage_db_tables,
   }
+
   if is_string($manage_db_tables) {
     $safe_manage_db_tables = str2bool($manage_db_tables)
   } else {
     $safe_manage_db_tables = $manage_db_tables
   }
 
-  $db_backend =  $::bacula_db_backend ? {
+  $db_backend = $::bacula_db_backend ? {
     undef   => 'sqlite',
     default => $::bacula_db_backend,
   }
 
   $mail_to = $::bacula_mail_to ? {
-    undef   => "root@${domain}",
+    undef   => "root@${::domain}",
     default => $::bacula_mail_to,
+  }
+
+  $mail_from = $::bacula_mail_from ? {
+    undef   => "bacula@${::domain}",
+    default => $::bacula_mail_from,
   }
 
   $director_password = $::bacula_director_password ? {
@@ -122,6 +133,11 @@ class bacula::config {
   $console_password = $::bacula_console_password ? {
     undef   => '',
     default => $::bacula_console_password,
+  }
+
+  $storage_password = $::bacula_storage_password ? {
+    undef   => cache_data('bacula', 'storage_password', random_password(32)),
+    default => $::bacula_storage_password,
   }
 
   $director_server = $::bacula_director_server ? {
@@ -135,7 +151,10 @@ class bacula::config {
   }
 
   $director_package = $::bacula_director_package ? {
-    undef   => '', # By default, let the db package handle this
+    undef   => $osfamily ? {
+      /(RedHat)/ => 'bacula-director',
+      default    => '',
+    },
     default => $::bacula_director_package,
   }
 
@@ -149,34 +168,39 @@ class bacula::config {
     default => $::bacula_client_package,
   }
 
-  $director_mysql_package  = $::bacula_director_mysql_package ? {
+  $director_mysql_package = $::bacula_director_mysql_package ? {
     undef   => 'bacula-director-mysql',
     default => $::bacula_director_mysql_package,
   }
 
-  $storage_mysql_package  = $::bacula_storage_mysql_package ? {
-	undef   => $osfamily ? {
-      /(RedHat|Suse)/ => 'bacula-storage-mysql',
+  $storage_mysql_package = $::bacula_storage_mysql_package ? {
+    undef   => $osfamily ? {
+      /(RedHat|Suse)/ => 'bacula-storage',
+      /(Suse)/        => 'bacula-storage-mysql',
       default         => 'bacula-sd-mysql',
     },
     default => $::bacula_storage_mysql_package,
   }
 
-  $director_postgresql_package  = $::bacula_director_postgresql_package ? {
-    undef   => 'bacula-director-postgresql',
+  $director_postgresql_package = $::bacula_director_postgresql_package ? {
+    undef   => $osfamily ? {
+      /(RedHat)/ => 'bacula-libs-sql',
+      default    => 'bacula-director-postgresql',
+    },
     default => $::bacula_director_postgresql_package,
   }
 
-  $storage_postgresql_package  = $::bacula_storage_postgresql_package ? {
-	undef   => $osfamily ? {
-      /(RedHat|Suse)/ => 'bacula-storage-postgresql',
+  $storage_postgresql_package = $::bacula_storage_postgresql_package ? {
+    undef   => $osfamily ? {
+      /(RedHat|Suse)/ => 'bacula-storage',
+      /(Suse)/        => 'bacula-storage-postgresql',
       default         => 'bacula-sd-postgresql',
     },
     default => $::bacula_storage_postgresql_package,
   }
 
   $director_sqlite_package = $::bacula_director_sqlite_package ? {
-	undef  => $osfamily ? {
+    undef   => $osfamily ? {
       /(RedHat|Suse)/ => 'bacula-director-sqlite',
       default         => 'bacula-director-sqlite3',
     },
@@ -184,7 +208,7 @@ class bacula::config {
   }
 
   $storage_sqlite_package = $::bacula_storage_sqlite_package ? {
-	undef  => $osfamily ? {
+    undef   => $osfamily ? {
       /(RedHat|Suse)/ => 'bacula-storage-sqlite',
       default         => 'bacula-sd-sqlite3',
     },
@@ -212,7 +236,7 @@ class bacula::config {
   }
 
   $db_port = $::bacula_db_port ? {
-    undef   => '3306',
+    undef   => undef,
     default => $::bacula_db_port,
   }
 
@@ -231,14 +255,14 @@ class bacula::config {
     default => $::bacula_db_database,
   }
 
-  #If it's undef, that's fine
+  # If it's undef, that's fine
   $director_template = $::bacula_director_template
-  $storage_template  = $::bacula_storage_template
-  $console_template  = $::bacula_console_template
-  $client_template   = $::bacula_client_template
-  
+  $storage_template = $::bacula_storage_template
+  $console_template = $::bacula_console_template
+  $client_template = $::bacula_client_template
+
   $director_service = $::bacula_director_service ? {
-    undef  => $osfamily ? {
+    undef   => $osfamily ? {
       /(RedHat|Suse)/ => 'bacula-dir',
       default         => 'bacula-director',
     },
@@ -246,15 +270,15 @@ class bacula::config {
   }
 
   $working_directory = $::bacula_working_directory ? {
-    undef  => $osfamily ? {
+    undef   => $osfamily ? {
       /(RedHat)/ => '/var/spool/bacula',
-      default         => '/var/lib/bacula',
+      default    => '/var/lib/bacula',
     },
     default => $::bacula_working_directory,
   }
 
   $pid_directory = $::bacula_pid_directory ? {
-    undef  => $osfamily ? {
+    undef   => $osfamily ? {
       /(RedHat|Suse)/ => '/var/run',
       default         => '/var/run/bacula',
     },

@@ -1,6 +1,6 @@
 # Class: bacula::common
-# 
-# This class enforces common resources needed by all 
+#
+# This class enforces common resources needed by all
 # bacula components
 #
 # Actions:
@@ -11,8 +11,8 @@
 #
 # class { 'bacula::common': }
 class bacula::common(
-    $manage_db_tables,
     $manage_db,
+    $manage_db_tables,
     $db_backend,
     $db_user,
     $db_database,
@@ -21,6 +21,8 @@ class bacula::common(
     $mysql_package,
     $postgresql_package,
     $sqlite_package,
+    $working_directory,
+    $pid_directory,
     $db_host
   ) {
 
@@ -31,11 +33,12 @@ class bacula::common(
   }
 
   if $db_package {
-    package { $db_package: 
+    package { $db_package:
       ensure => installed,
       notify => $manage_db_tables ? {
         true  => Exec['make_db_tables'],
         false => undef,
+        undef => undef,
       }
     }
   }
@@ -44,15 +47,6 @@ class bacula::common(
     'sqlite' => '',
     'mysql'  => "--host=${db_host} --user=${db_user} --password=${db_password} --port=${db_port} --database=${db_database}",
     'postgresql'  => "--host=${db_host} --username=${db_user} --port=${db_port} --dbname=${db_database}",
-  }
-
-  if $manage_db_tables {
-    exec { 'make_db_tables':
-      environment => "PGPASSWORD=${db_password}",
-      command     => "make_bacula_tables ${db_parameters}",
-      path        => "/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:/usr/lib64/bacula:/usr/lib/bacula:/usr/libexec/bacula",
-      refreshonly => true,
-    }
   }
 
   if $manage_db {
@@ -66,7 +60,7 @@ class bacula::common(
             true  => Exec['make_db_tables'],
             false => undef,
           },
-          require => defined(Class['mysql::server']) ? {
+          require  => defined(Class['mysql::server']) ? {
             true  => Class['mysql::server'],
             false => undef,
           },
@@ -77,15 +71,16 @@ class bacula::common(
         Postgresql_psql {
              cwd => '/',
         }
+        $pgsql_password = postgresql_password($db_user, $db_password)
         postgresql::server::db { $db_database:
           user     => $db_user,
-          password => $db_password,
+          password => $pgsql_password,
           owner    => $db_user,
           notify   => $manage_db_tables ? {
             true  => Exec['make_db_tables'],
             false => undef,
           },
-          require => defined(Class['postgresql::server']) ? {
+          require  => defined(Class['postgresql::server']) ? {
             true  => Class['postgresql::server'],
             false => undef,
           },
@@ -95,7 +90,7 @@ class bacula::common(
 
       'sqlite': {
         sqlite::db { $db_database:
-          location => "/var/lib/bacula/${db_database}.db", 
+          location => "/var/lib/bacula/${db_database}.db",
           owner    => 'bacula',
           group    => 'bacula',
           ensure   => present,
@@ -118,13 +113,7 @@ class bacula::common(
     ensure => present,
   }
 
-  file { '/var/lib/bacula':
-    ensure => directory,
-    owner  => bacula,
-    group  => bacula,
-  }
-
-  file { '/var/spool/bacula':
+  file { $working_directory:
     ensure => directory,
     owner  => bacula,
     group  => bacula,
@@ -137,7 +126,7 @@ class bacula::common(
     recurse => true,
   }
 
-  file { '/var/run/bacula':
+  file { $pid_directory:
     ensure => directory,
     owner  => bacula,
     group  => bacula,

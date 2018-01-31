@@ -33,7 +33,7 @@
 #   - Enforce the bacula-sd service to be running
 #
 # Sample Usage:
-# 
+#
 # class { 'bacula::client':
 #   director_server   => 'bacula.domain.com',
 #   director_password => 'XXXXXXXXXX',
@@ -43,19 +43,19 @@ class bacula::storage(
     $db_backend,
     $director_server,
     $director_password,
+    $storage_password,
     $storage_server,
     $storage_package = '',
     $mysql_package,
     $sqlite_package,
     $postgresql_package,
     $console_password,
+    $pid_directory,
     $template = 'bacula/bacula-sd.conf.erb'
   ) {
 
-  $storage_name_array = split($storage_server, '[.]')
-  $director_name_array = split($director_server, '[.]')
-  $storage_name = $storage_name_array[0]
-  $director_name = $director_name_array[0]
+  $storage_name = $::fqdn
+  $director_name = $director_server
 
   $db_package = $db_backend ? {
     'mysql'  => $mysql_package,
@@ -64,10 +64,10 @@ class bacula::storage(
   }
 
   # This is necessary because the bacula-common package will
-  # install the bacula-storage-mysql package regardless of 
+  # install the bacula-storage-mysql package regardless of
   # wheter we're installing the bacula-storage-sqlite package
   # This causes the bacula storage daemon to use mysql no
-  # matter what db backend we want to use.  
+  # matter what db backend we want to use.
   #
   # However, if we install only the db compoenent package,
   # it will install the bacula-common package without
@@ -102,11 +102,14 @@ class bacula::storage(
     }
   }
 
-  file { ['/mnt/bacula', '/mnt/bacula/default']:
-    ensure  => directory,
-    owner   => 'bacula',
-    group   => 'bacula',
-    mode    => '0750',
+  ##
+  # storage path
+  ##
+  file { '/mnt/bacula':
+    ensure => directory,
+    owner  => 'bacula',
+    group  => 'bacula',
+    mode   => '0750',
   }
 
   file { '/etc/bacula/bacula-sd.d':

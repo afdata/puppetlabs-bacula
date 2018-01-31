@@ -10,6 +10,7 @@ class bacula::config::validate(
     $db_user,
     $db_password,
     $mail_to,
+    $mail_from,
     $is_director,
     $is_client,
     $is_storage,
@@ -22,7 +23,9 @@ class bacula::config::validate(
     $console_password,
     $use_console,
     $manage_db,
-    $manage_db_tables
+    $manage_db_tables,
+    $pid_directory,
+    $working_directory,
   ) {
 
   #Validate our booleans
@@ -44,8 +47,9 @@ class bacula::config::validate(
   #Validate mail_to is an email address
   if $is_director {
     validate_re($mail_to, '^[\w-]+@([\w-]+\.)+[\w-]+$')
+    validate_re($mail_from, '^[\w-]+@([\w-]+\.)+[\w-]+$')
   }
-  
+
   #Validate the director and storage servers given are fully qualified domain names
   validate_re($director_server, '^[a-z0-9_-]+(\.[a-z0-9_-]+){2,}$')
   validate_re($storage_server, '^[a-z0-9_-]+(\.[a-z0-9_-]+){2,}$')
@@ -75,6 +79,14 @@ class bacula::config::validate(
     fail '$db_database cannot be empty'
   }
 
+  if !is_absolute_path($pid_directory) {
+    fail '$pid_directory must be a vaild absolute path'
+  }
+
+  if !is_absolute_path($working_directory) {
+    fail '$working_directory must be a vaild absolute path'
+  }
+
   if $db_backend != 'sqlite' {
     if empty($db_host) {
       fail '$db_host cannot be empty'
@@ -82,8 +94,10 @@ class bacula::config::validate(
     if empty($db_user) {
       fail '$db_user cannot be empty'
     }
-    if ! is_integer($db_port) {
-      fail "${db_port} must be a port number"
+    if $db_port {
+      if ! is_integer($db_port) {
+        fail "${db_port} must be a port number"
+      }
     }
     if empty($db_password) {
       fail '$db_password cannot be empty'

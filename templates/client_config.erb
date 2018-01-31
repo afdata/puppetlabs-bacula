@@ -1,9 +1,10 @@
 Client {
   Name     = "<%= @hostname %>"
   Address  = "<%= @name %>"
+  FDPort = 9102
   Password = "<%= scope.lookupvar('bacula::director::password') %>"
   Catalog  = "<%= scope.lookupvar('bacula::director::director_name') %>:<%= scope.lookupvar('bacula::director::db_backend') %>"
-  File Retention = 6 Weeks
+  File Retention = 6 Month
   Job Retention  = 1 Year
   Auto Prune = Yes
 }
@@ -11,10 +12,17 @@ Client {
 Job {
   Name     = "<%= @hostname %>"
   Client   = "<%= @hostname %>"
-  Type     = Backup
-  FileSet  = "<%= @fileset %>"
+  <%- if @jobdefs and !@jobdefs.empty? -%>
+  JobDefs  = <%= @jobdefs %>
+  <%- else -%>
+  JobDefs  = default
+  <%- end -%>
+  Level    = Incremental
+  <%- if @fileset and !@fileset.empty? -%>
+  FileSet  = <%= @fileset %>
+  <%- else -%>
+  FileSet  = linux:default
+  <%- end -%>
   Storage  = "<%= scope.lookupvar('bacula::director::storage_name') %>:storage:default"
-  Schedule = "<%= schedule %>"
-  Pool     = "<%= scope.lookupvar('bacula::director::storage_name') %>:pool:default"
   Messages = "<%= @director_name %>:messages:standard"
 }

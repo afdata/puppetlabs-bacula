@@ -10,10 +10,10 @@
 #   $template:
 #     The template to use to generate teh bconsole.conf file (Optional)
 #     - Default: 'bacula/bconsole.conf.erb'
-#     
+#
 # Sample Usage:
 #
-# class { 'bacula::console':     
+# class { 'bacula::console':
 #   director_server   => 'bacula.domain.com',
 #   director_password => 'XXXXXXXX',
 # }
@@ -24,8 +24,7 @@ class bacula::console(
     $template = 'bacula/bconsole.conf.erb'
   ) {
 
-  $director_name_array = split($server, '[.]')
-  $director_name = $director_name_array[0]
+  $director_name = $director_server
 
   if $console_package {
     package { $console_package:

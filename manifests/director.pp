@@ -28,6 +28,8 @@
 #     Name of the bacula director service start-stop skript
 #   $console_password:
 #     If $use_console is true, then use this value for the password
+#   $pid_directory:
+#    this is the directory where the
 #
 # Sample Usage:
 #
@@ -50,32 +52,25 @@ class bacula::director(
     $db_database,
     $db_port,
     $storage_server,
-    $director_package = '',
+    $director_package,
     $mysql_package,
     $postgresql_package,
     $sqlite_package,
     $mail_to,
+    $mail_from,
     $template = 'bacula/bacula-dir.conf.erb',
     $use_console,
     $console_password,
+    $storage_password,
     $director_service,
-    $clients = {}
+    $clients = {},
+    $pid_directory,
+    $working_directory,
+    $manage_db_tables,
   ) {
 
-
-  $storage_name_array = split($storage_server, '[.]')
-  $director_name_array = split($server, '[.]')
-  $storage_name = $storage_name_array[0]
-  $director_name = $director_name_array[0]
-
-
-  # This function takes each client specified in $clients
-  # and generates a bacula::client resource for each
-  #
-  # It also searches top scope for variables in the style
-  # $bacula_client_mynode with values in format
-  # fileset=Basic:noHome,schedule=Hourly
-  generate_clients($clients)
+  $storage_name = $storage_server
+  $director_name = $server
 
   # Only support mysql or sqlite.
   # The given backend is validated in the bacula::config::validate class
@@ -89,9 +84,7 @@ class bacula::director(
   if $director_package {
     package { $director_package:
       ensure => installed,
-    }
-    File['/etc/bacula/bacula-dir.conf'] {
-      require +> Package[$director_pacakge],
+      before => File['/etc/bacula/bacula-dir.conf', '/etc/bacula/bacula-dir.d']
     }
   }
 
@@ -109,36 +102,51 @@ class bacula::director(
     owner   => 'bacula',
     group   => 'bacula',
     content => template($template),
-    notify  => Service["$director_service"],
-    require => $db_package ? {
-      ''      => undef,
-      default => Package[$db_package],
-    }
+    notify  => Service[$director_service],
   }
 
   file { '/etc/bacula/bacula-dir.d':
     ensure => directory,
     owner  => 'bacula',
     group  => 'bacula',
-    require => Package[$db_package],
-    before => Service["$director_service"],
+    purge  => true,
+    before => Service[$director_service],
   }
 
   file { '/etc/bacula/bacula-dir.d/empty.conf':
     ensure => file,
-    before => Service["$director_service"],
+    before => Service[$director_service],
+  }
+
+  if $manage_db_tables {
+    exec { 'make_db_tables':
+      environment => "PGPASSWORD=${db_password}",
+      command     => "make_bacula_tables ${db_parameters}",
+      path        => '/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:/usr/lib64/bacula:/usr/lib/bacula:/usr/libexec/bacula',
+      refreshonly => true,
+      require     => Package['bacula-director'],
+      notify      => Service["bacula:${director_service}"],
+    } ~>
+
+    exec { 'grant_bacula_privileges':
+      command     => "grant_bacula_privileges ${db_backend}",
+      path        => '/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:/usr/lib64/bacula:/usr/lib/bacula:/usr/libexec/bacula',
+      refreshonly => true,
+      notify      => Service["bacula:${director_service}"],
+    }
+
   }
 
   # Register the Service so we can manage it through Puppet
-  service { "bacula:$director_service":
-    name       => "$director_service",
+  service { "bacula:${director_service}":
+    name       => $director_service,
     enable     => true,
     ensure     => running,
     hasstatus  => true,
     hasrestart => true,
     require    => $db_package ? {
-      ''       => undef,
-      default  => Package[$db_package],
+      ''      => undef,
+      default => Package[$db_package],
     }
   }
 }

@@ -16,7 +16,7 @@
 #   - Enforce the bacula-fd service to be running
 #
 # Sample Usage:
-# 
+#
 # class { 'bacula::client':
 #   director_server   => 'bacula.domain.com',
 #   director_password => 'XXXXXXXXXX',
@@ -31,8 +31,7 @@ class bacula::client(
     $pid_directory = $bacula::config::pid_directory
   ) inherits bacula::config {
 
-  $director_name_array = split($director_server, '[.]')
-  $director_name = $director_name_array[0]
+  $director_name = $director_server
 
   package { $client_package:
     ensure => installed,
