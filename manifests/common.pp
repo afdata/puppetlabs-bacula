@@ -76,6 +76,7 @@ class bacula::common(
           user     => $db_user,
           password => $pgsql_password,
           owner    => $db_user,
+          encoding => 'SQL_ASCII',
           notify   => $manage_db_tables ? {
             true  => Exec['make_db_tables'],
             false => undef,
