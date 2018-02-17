@@ -140,6 +140,7 @@ class bacula(
     $director_service        = $bacula::config::director_service,
     $working_directory       = $bacula::config::working_directory,
     $pid_directory           = $bacula::config::pid_directory,
+    $starttime               = $bacula::config::starttime,
     $clients                 = {}
   ) inherits bacula::config {
 
@@ -177,6 +178,7 @@ class bacula(
     manage_db         => $manage_db,
     pid_directory     => $pid_directory,
     working_directory => $working_directory,
+    starttime         => $starttime,
   }
 
   class { 'bacula::common':
@@ -222,6 +224,7 @@ class bacula(
       working_directory  => $working_directory,
       clients            => $clients,
       manage_db_tables   => $manage_db_tables,
+      starttime          => $starttime,
     }
   }
 

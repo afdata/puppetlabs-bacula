@@ -284,4 +284,9 @@ class bacula::config {
     },
     default => $::bacula_pid_directory,
   }
+
+  $starttime = $::bacula_starttime ? {
+    undef   => '03:05',
+    default => $::bacula_starttime,
+  }
 }

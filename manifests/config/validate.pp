@@ -26,6 +26,7 @@ class bacula::config::validate(
     $manage_db_tables,
     $pid_directory,
     $working_directory,
+    $starttime,
   ) {
 
   #Validate our booleans
@@ -102,5 +103,9 @@ class bacula::config::validate(
     if empty($db_password) {
       fail '$db_password cannot be empty'
     }
+  }
+
+  if !is_string($starttime) {
+    fail '$starttime must be a string'
   }
 }

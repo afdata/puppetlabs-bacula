@@ -67,6 +67,7 @@ class bacula::director(
     $pid_directory,
     $working_directory,
     $manage_db_tables,
+    $starttime,
   ) {
 
   $storage_name = $storage_server

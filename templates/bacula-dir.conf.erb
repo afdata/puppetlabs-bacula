@@ -37,7 +37,7 @@ Job {
   FileSet = "catalog"
   Schedule = "catalog"
   Pool = catalog
-  RunBeforeJob = "/usr/libexec/bacula/make_catalog_backup.pl default"
+  RunBeforeJob = "/usr/libexec/bacula/make_catalog_backup.pl <%= @director_name -%>:catalog:<%= @db_backend %>"
   RunAfterJob  = "/usr/libexec/bacula/delete_catalog_backup"
   Write Bootstrap = "<%= @working_directory -%>/%n.bsr"
   Priority = 11
@@ -105,7 +105,7 @@ FileSet {
       wildfile = "^/var/log/bacula/bacula.log"
       exclude = yes
     }
-    File = "\\bash -c \"grep -e btrfs -e ext4 -e ext3 -e ext2 -e udf -e ' xfs' -e reiserfs -e ntfs -e hfs -e msdos -e fat -e jbd2 -e jfs -e gfs2 -e ocfs2 /proc/mounts | awk '{print \$2}'\""
+    File = "\\|bash -c \"grep -e btrfs -e ext4 -e ext3 -e ext2 -e udf -e ' xfs' -e reiserfs -e ntfs -e hfs -e msdos -e fat -e jbd2 -e jfs -e gfs2 -e ocfs2 /proc/mounts | awk '{print \$2}'\""
    }
 }
 
@@ -151,9 +151,9 @@ FileSet {
 #
 Schedule {
   Name = "default"
-  Run = Level=Incremental Pool=daily mon-sat at 03:05
-  Run = Level=Differential Pool=weekly 2nd-5th sun at 03:05
-  Run = Level=Full Pool=monthly 1st sun at 03:05
+  Run = Level=Incremental Pool=daily mon-sat at <%= @starttime %>
+  Run = Level=Differential Pool=weekly 2nd-5th sun at <%= @starttime %>
+  Run = Level=Full Pool=monthly 1st sun at <%= @starttime %>
 }
 
 Schedule {
