@@ -72,6 +72,8 @@
 #   $clients
 #     For directors, $clients is a hash of clients.  The keys are the clients while the value is a hash of parameters
 #     The parameters accepted are fileset and schedule.
+#   $custom_config
+#     This options enabes the directory /etc/bacula/bacula-dir-custom.d for the auto include.
 #
 # Example clients hash
 #  $clients = {
@@ -141,7 +143,8 @@ class bacula(
     $working_directory       = $bacula::config::working_directory,
     $pid_directory           = $bacula::config::pid_directory,
     $starttime               = $bacula::config::starttime,
-    $clients                 = {}
+    $clients                 = {},
+    $custom_config           = false,
   ) inherits bacula::config {
 
 
@@ -225,6 +228,7 @@ class bacula(
       clients            => $clients,
       manage_db_tables   => $manage_db_tables,
       starttime          => $starttime,
+      custom_config      => $custom_config,
     }
   }
 

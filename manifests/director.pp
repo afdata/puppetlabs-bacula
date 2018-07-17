@@ -30,6 +30,8 @@
 #     If $use_console is true, then use this value for the password
 #   $pid_directory:
 #    this is the directory where the
+#   $custom_config
+#    for the custom bacula directory config
 #
 # Sample Usage:
 #
@@ -58,16 +60,17 @@ class bacula::director(
     $sqlite_package,
     $mail_to,
     $mail_from,
-    $template = 'bacula/bacula-dir.conf.erb',
     $use_console,
     $console_password,
     $storage_password,
     $director_service,
-    $clients = {},
     $pid_directory,
     $working_directory,
     $manage_db_tables,
     $starttime,
+    $custom_config,
+    $clients = {},
+    $template = 'bacula/bacula-dir.conf.erb',
   ) {
 
   $storage_name = $storage_server
@@ -107,11 +110,12 @@ class bacula::director(
   }
 
   file { '/etc/bacula/bacula-dir.d':
-    ensure => directory,
-    owner  => 'bacula',
-    group  => 'bacula',
-    purge  => true,
-    before => Service[$director_service],
+    ensure  => directory,
+    owner   => 'bacula',
+    group   => 'bacula',
+    purge   => true,
+    recurse => true,
+    before  => Service[$director_service],
   }
 
   file { '/etc/bacula/bacula-dir.d/empty.conf':
@@ -119,10 +123,20 @@ class bacula::director(
     before => Service[$director_service],
   }
 
+  if $custom_config {
+    file { '/etc/bacula/bacula-dir-custom.d':
+      ensure => directory,
+      owner  => 'bacula',
+      group  => 'bacula',
+      purge  => true,
+      before => Service[$director_service],
+    }
+  }
+
   if $manage_db_tables {
     exec { 'make_db_tables':
       environment => "PGPASSWORD=${db_password}",
-      command     => "make_bacula_tables ${db_parameters}",
+      command     => "make_bacula_tables ${db_database}",
       path        => '/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:/usr/lib64/bacula:/usr/lib/bacula:/usr/libexec/bacula',
       refreshonly => true,
       require     => Package['bacula-director'],
@@ -133,6 +147,7 @@ class bacula::director(
       command     => "grant_bacula_privileges ${db_backend}",
       path        => '/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:/usr/lib64/bacula:/usr/lib/bacula:/usr/libexec/bacula',
       refreshonly => true,
+      environment => [ "db_name=${db_database}", "PGPASSWORD=${db_password}", "db_user=${db_user}" ],
       notify      => Service["bacula:${director_service}"],
     }
 
@@ -140,9 +155,9 @@ class bacula::director(
 
   # Register the Service so we can manage it through Puppet
   service { "bacula:${director_service}":
+    ensure     => running,
     name       => $director_service,
     enable     => true,
-    ensure     => running,
     hasstatus  => true,
     hasrestart => true,
     require    => $db_package ? {

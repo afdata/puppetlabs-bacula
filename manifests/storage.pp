@@ -45,12 +45,12 @@ class bacula::storage(
     $director_password,
     $storage_password,
     $storage_server,
-    $storage_package = '',
     $mysql_package,
     $sqlite_package,
     $postgresql_package,
     $console_password,
     $pid_directory,
+    $storage_package = '',
     $template = 'bacula/bacula-sd.conf.erb'
   ) {
 
@@ -126,8 +126,8 @@ class bacula::storage(
 
   # Register the Service so we can manage it through Puppet
   service { 'bacula-sd':
-    enable     => true,
     ensure     => running,
+    enable     => true,
     hasstatus  => true,
     hasrestart => true,
     require    => $db_package ? {

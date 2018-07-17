@@ -300,3 +300,6 @@ Console {
 # Include additional configuration
 #
 @|"sh -c 'for f in `find /etc/bacula/bacula-dir.d -type f -name \"*.conf\"` ; do echo @${f} ; done'"
+<%- if @custom_config -%>
+@|"sh -c 'for f in `find /etc/bacula/bacula-dir-custom.d -type f -name \"*.conf\"` ; do echo @${f} ; done'"
+<% end -%>

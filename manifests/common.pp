@@ -23,7 +23,7 @@ class bacula::common(
     $sqlite_package,
     $working_directory,
     $pid_directory,
-    $db_host
+    $db_host,
   ) {
 
   $db_package = $db_backend ? {
@@ -69,7 +69,7 @@ class bacula::common(
 
       'postgresql': {
         Postgresql_psql {
-             cwd => '/',
+          cwd => '/',
         }
         $pgsql_password = postgresql_password($db_user, $db_password)
         postgresql::server::db { $db_database:
@@ -91,10 +91,10 @@ class bacula::common(
 
       'sqlite': {
         sqlite::db { $db_database:
+          ensure   => present,
           location => "/var/lib/bacula/${db_database}.db",
           owner    => 'bacula',
           group    => 'bacula',
-          ensure   => present,
           require  => File['/var/lib/bacula'],
         }
       }

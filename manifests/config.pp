@@ -151,7 +151,7 @@ class bacula::config {
   }
 
   $director_package = $::bacula_director_package ? {
-    undef   => $osfamily ? {
+    undef   => $::osfamily ? {
       /(RedHat)/ => 'bacula-director',
       default    => '',
     },
@@ -174,7 +174,7 @@ class bacula::config {
   }
 
   $storage_mysql_package = $::bacula_storage_mysql_package ? {
-    undef   => $osfamily ? {
+    undef   => $::osfamily ? {
       /(RedHat|Suse)/ => 'bacula-storage',
       /(Suse)/        => 'bacula-storage-mysql',
       default         => 'bacula-sd-mysql',
@@ -183,7 +183,7 @@ class bacula::config {
   }
 
   $director_postgresql_package = $::bacula_director_postgresql_package ? {
-    undef   => $osfamily ? {
+    undef   => $::osfamily ? {
       /(RedHat)/ => 'bacula-libs-sql',
       default    => 'bacula-director-postgresql',
     },
@@ -191,7 +191,7 @@ class bacula::config {
   }
 
   $storage_postgresql_package = $::bacula_storage_postgresql_package ? {
-    undef   => $osfamily ? {
+    undef   => $::osfamily ? {
       /(RedHat|Suse)/ => 'bacula-storage',
       /(Suse)/        => 'bacula-storage-postgresql',
       default         => 'bacula-sd-postgresql',
@@ -200,7 +200,7 @@ class bacula::config {
   }
 
   $director_sqlite_package = $::bacula_director_sqlite_package ? {
-    undef   => $osfamily ? {
+    undef   => $::osfamily ? {
       /(RedHat|Suse)/ => 'bacula-director-sqlite',
       default         => 'bacula-director-sqlite3',
     },
@@ -208,7 +208,7 @@ class bacula::config {
   }
 
   $storage_sqlite_package = $::bacula_storage_sqlite_package ? {
-    undef   => $osfamily ? {
+    undef   => $::osfamily ? {
       /(RedHat|Suse)/ => 'bacula-storage-sqlite',
       default         => 'bacula-sd-sqlite3',
     },
@@ -262,7 +262,7 @@ class bacula::config {
   $client_template = $::bacula_client_template
 
   $director_service = $::bacula_director_service ? {
-    undef   => $osfamily ? {
+    undef   => $::osfamily ? {
       /(RedHat|Suse)/ => 'bacula-dir',
       default         => 'bacula-director',
     },
@@ -270,7 +270,7 @@ class bacula::config {
   }
 
   $working_directory = $::bacula_working_directory ? {
-    undef   => $osfamily ? {
+    undef   => $::osfamily ? {
       /(RedHat)/ => '/var/spool/bacula',
       default    => '/var/lib/bacula',
     },
@@ -278,7 +278,7 @@ class bacula::config {
   }
 
   $pid_directory = $::bacula_pid_directory ? {
-    undef   => $osfamily ? {
+    undef   => $::osfamily ? {
       /(RedHat|Suse)/ => '/var/run',
       default         => '/var/run/bacula',
     },
