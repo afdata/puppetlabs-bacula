@@ -135,10 +135,10 @@ class bacula::director(
 
   if $manage_db_tables {
     exec { 'make_db_tables':
-      environment => "PGPASSWORD=${db_password}",
-      command     => "make_bacula_tables ${db_database}",
+      command     => "make_bacula_tables ${db_backend}",
       path        => '/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:/usr/lib64/bacula:/usr/lib/bacula:/usr/libexec/bacula',
       refreshonly => true,
+      environment => [ "db_name=${db_database}", "db_password=${db_password}", "db_user=${db_user}" ],
       require     => Package['bacula-director'],
       notify      => Service["bacula:${director_service}"],
     } ~>
@@ -147,7 +147,7 @@ class bacula::director(
       command     => "grant_bacula_privileges ${db_backend}",
       path        => '/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:/usr/lib64/bacula:/usr/lib/bacula:/usr/libexec/bacula',
       refreshonly => true,
-      environment => [ "db_name=${db_database}", "PGPASSWORD=${db_password}", "db_user=${db_user}" ],
+      environment => [ "db_name=${db_database}", "db_password=${db_password}", "db_user=${db_user}" ],
       notify      => Service["bacula:${director_service}"],
     }
 

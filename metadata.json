@@ -22,10 +22,10 @@
   "license": "Apache",
   "name": "puppetlabs-bacula",
   "operatingsystem_support": [],
-  "project_page": "http://github.com/puppetlabs/puppetlabs-bacula",
+  "project_page": "http://github.com/afdata/puppetlabs-bacula",
   "requirements": [],
   "source": "http://github.com/puppetlabs/puppetlabs-bacula",
   "summary": "This module manages a bacula infrastructure",
   "tags": [],
-  "version": "0.0.4"
+  "version": "0.0.5"
 }

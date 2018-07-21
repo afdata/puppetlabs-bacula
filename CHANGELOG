@@ -1,6 +1,11 @@
+2018-07-20 - Patrick Emer <pemer@afdata.de> - 0.0.5
+- Support for simple lint and parser test wire Rakefile
+- Fix syntax issue, now without
+- Fixing the makeing of tables and grant tables scripts  
+
 2014-10-04 - Patrick Emer <pemer@afdata.de> - 0.0.3
  - Support for Redhat/Centos distributions
- - Support for postgresql database catalog 
+ - Support for postgresql database catalog
 
 2011-12-15 - Carl Caum <carl@puppetlabs.com> - 0.0.1
  - Support multiple DB backends
