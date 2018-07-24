@@ -1,7 +1,10 @@
+2018-07-24 - Patrick Emer <pemer@afdata.de> - 0.0.6
+- Update FileSet "linux:default" for a universal backup linux fileset
+
 2018-07-20 - Patrick Emer <pemer@afdata.de> - 0.0.5
 - Support for simple lint and parser test wire Rakefile
 - Fix syntax issue, now without
-- Fixing the makeing of tables and grant tables scripts  
+- Fixing the makeing of tables and grant tables scripts
 
 2014-10-04 - Patrick Emer <pemer@afdata.de> - 0.0.3
  - Support for Redhat/Centos distributions

@@ -85,28 +85,30 @@ FileSet {
 
   Include {
     Options {
-      signature = SHA1
-      compression = GZIP6
-      onefs = yes
-      Accurate = Yes
-      aclsupport = yes
-      sparse = yes
-      regexdir = "^/var/.*/proc/.*"
-      regexdir   = "^/mnt/.*"
+      signature    = SHA1
+      compression  = GZIP6
+      onefs        = yes
+      Accurate     = Yes
+      aclsupport   = yes
+      xattrsupport = yes
+    }
+    Options {
       wildfile = "/.journal"
       wildfile = "/.fsck"
-      regexdir = "^/dev/.*"
-      regexdir = "^/cgroup/.*"
-      regexdir = "^/selinux/.*"
-      regexdir = "^/var/lib/docker/.*"
-      regexdir = "^/var/lib/pgsql/data/base.*"
-      regexdir = "^/var/lib/mysql/.*"
-      regexdir = "^/rhev/data-center/mnt/.*"
-      wildfile = "^/var/log/bacula/bacula.log"
-      exclude = yes
+      wildfile = "/var/log/bacula/bacula*log"
+      wilddir  = "/dev"
+      wilddir  = "/cgroup"
+      wilddir  = "/selinux"
+      regex    = "^/mnt/.*"
+      regex    = "^/var/.*/proc/.*"
+      regex    = "^/var/lib/docker/.*"
+      regex    = "^/var/lib/pgsql/data/.*"
+      regex    = "^/var/lib/mysql/.*"
+      regex    = "^/rhev/data-center/mnt/.*"
+      Exclude  = yes
     }
     File = "\\|bash -c \"grep -e btrfs -e ext4 -e ext3 -e ext2 -e udf -e ' xfs' -e reiserfs -e ntfs -e hfs -e msdos -e fat -e jbd2 -e jfs -e gfs2 -e ocfs2 /proc/mounts | awk '{print \$2}'\""
-   }
+  }
 }
 
 #
